@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Approval Required - {{ project_name }}</title>
+</head>
+<body>
+    <h1>New User Approval Required</h1>
+    <p>A new user has registered and requires your approval:</p>
+    <ul>
+        <li>Name: {{ user.name }} {{ user.family_name }}</li>
+        <li>Email: {{ user.email }}</li>
+        <li>Workplace: {{ user.workplace }}</li>
+        <li>Position: {{ user.position }}</li>
+        <li>Note: {{ user.note or 'None' }}</li>
+    </ul>
+    <p>Please log in to the admin panel to approve or reject this user.</p>
+</body>
+</html>

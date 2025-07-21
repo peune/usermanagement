@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+</head>
+<body>
+    <h1>Welcome, {{ user.name }} {{ user.family_name }}!</h1>
+    <p>You have successfully logged in.</p>
+
+    <button id="logoutBtn">Logout</button>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/logout', {
+                method: 'POST',
+                credentials: 'include'  // Send cookies
+            });
+            window.location.href = '/';  // Redirect to index.html
+        });
+    </script>
+</body>
+</html>

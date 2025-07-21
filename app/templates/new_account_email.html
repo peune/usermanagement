@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to {{ project_name }}</title>
+</head>
+<body>
+    <h1>Welcome to {{ project_name }}, {{ username }}!</h1>
+    <p>Your account has been created and is pending admin approval.</p>
+    <p>You will receive another email once your account is approved.</p>
+    <p>Details:</p>
+    <ul>
+        <li>Name: {{ user.name }} {{ user.family_name }}</li>
+        <li>Workplace: {{ user.workplace }}</li>
+        <li>Position: {{ user.position }}</li>
+    </ul>
+</body>
+</html>
