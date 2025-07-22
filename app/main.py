@@ -22,7 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", "http://localhost:8000"], # ???
+    allow_origins=["http://localhost", "http://localhost:8000", "http://localhost:8501"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,7 +58,13 @@ async def login_for_access_token(
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect credentials")
 
-    access_token = auth.create_access_token(data={"sub": user.email})
+    token_data = {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "is_superuser": user.is_superuser
+    }
+    access_token = auth.create_access_token(data=token_data)
 
     # Set HTTP-only cookie
     response.set_cookie(
@@ -71,17 +77,25 @@ async def login_for_access_token(
     )
     return {"status": "success"}
 
+from fastapi.responses import RedirectResponse
 
 @app.get("/welcome", response_class=HTMLResponse)
 def welcome_page(
-    request: Request, 
-    current_user: models.User = Depends(auth.get_current_user),
-    db: Session = Depends(get_db) 
+    request: Request 
+    # current_user: models.User = Depends(auth.get_current_user),
+    # db: Session = Depends(get_db) 
     ):
 
-    # Force fresh DB check (bypass cache)
-    db.refresh(current_user)
-    return templates.TemplateResponse("welcome.html", {"request": request, "user": current_user})
+    token = request.cookies.get("access_token").replace("Bearer ", "")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    return RedirectResponse(
+        url=f"{settings.STREAMLIT_URL}/?token={token}"  # Just send the token for the moment
+    )
 
 @app.post("/logout")
 def logout(response: Response):
@@ -142,7 +156,7 @@ from jose import JWTError, jwt
 async def reset_password_page(request: Request, token: str):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        email = payload.get("sub")
+        email = payload.get("email")
         return templates.TemplateResponse(
             "reset_password.html",
             {"request": request, "email": email, "token": token}
@@ -160,7 +174,7 @@ async def reset_password(
     try:
         # Verify token
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        email = payload.get("sub")
+        email = payload.get("email")
         user = db.query(models.User).filter(models.User.email == email).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -188,7 +202,12 @@ def admin_login(
     if not user or not user.is_superuser:
         raise HTTPException(status_code=400, detail="Invalid admin credentials")
     
-    access_token = auth.create_access_token(data={"sub": user.email})
+    token_data = {
+        "id": user.id,
+        "email": user.email,
+        "is_superuser": user.is_superuser
+    }
+    access_token = auth.create_access_token(data=token_data)
 
     # Set HTTP-only cookie
     response.set_cookie(

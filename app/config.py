@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: PostgresDsn
     SECRET_KEY: str
+    ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # Email
@@ -18,6 +19,7 @@ class Settings(BaseSettings):
     # misc.
     ADMIN_EMAIL: EmailStr
     MAIN_URL: AnyHttpUrl
+    STREAMLIT_URL: AnyHttpUrl
     PROJECT_NAME: str
 
     

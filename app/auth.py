@@ -15,7 +15,7 @@ from dependencies import get_db
 
 # Configuration (should be in environment variables)
 SECRET_KEY = settings.SECRET_KEY # "your-secret-key"
-ALGORITHM = "HS256"
+ALGORITHM = settings.ALGORITHM # "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES # 30
 RESET_TOKEN_EXPIRE_MINUTES = 30
 
@@ -76,8 +76,6 @@ def verify_token(token: str, db: Session) -> models.User:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        user = schemas.User.from_orm(db_user)
-        print(user.__dict__)
         return db_user 
     
     except JWTError:
@@ -86,10 +84,13 @@ def verify_token(token: str, db: Session) -> models.User:
             detail="Invalid or expired token"
         )
     
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> models.User:
-    token = request.cookies.get("access_token").replace("Bearer ", "") or \
-            request.headers.get("authorization", "").replace("Bearer ", "")
+def get_current_user(
+        request: Request, 
+        db: Session = Depends(get_db)
+        ) -> models.User:
     
+    token = request.cookies.get("access_token").replace("Bearer ", "")
+
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

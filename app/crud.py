@@ -35,7 +35,6 @@ def create_user(db: Session, user: schemas.UserCreate):
 def approve_user(db: Session, user_id: int):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user:
-        print(db_user, flush=True)
         db_user.is_approved = True
         db.commit()
         db.refresh(db_user)
